@@ -106,7 +106,10 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
 };
 
 ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, inParams = {}, onResponse, onCancel) {
-    console.warn('* subscribeMethod', method);
+    const { DEBUG_LUNA_CALLS: debug } = process.env;
+    if (debug) {
+        console.warn('* subscribeMethod', method);
+    }
     const EventEmitter = require('events');
     const emitter = new EventEmitter();
     if (onResponse) {
@@ -128,7 +131,9 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         service: {}, // TODO: no idea what this looks like
         activity: {}, // TODO: no idea what this looks like
         respond: function handleResponse(response) {
-            console.warn('**** handleResponse', response);
+            if (debug) {
+                console.warn('**** handleResponse', response);
+            }
             emitter.emit('response', response);
         },
         cancel: function handleSubscriptionCancel() {
