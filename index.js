@@ -46,7 +46,7 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
         this.registerOriginal(methodName, requestCallback, cancelCallback);
     }
     return emitter;
-}.bind(ServiceInterface);
+};
 
 ServiceInterface.prototype.callPromise = function callPromise(uri, args) {
     return new Promise(function handlePromiseCall(resolve, reject) {
