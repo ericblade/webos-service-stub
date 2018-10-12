@@ -34,11 +34,11 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
     } else {
         emitter = this.stubMethods[methodName];
         if (requestCallback) {
-            emitter.removeListener('request');
+            emitter.removeAllListeners('request');
             emitter.on('request', requestCallback);
         }
         if (cancelCallback) {
-            emitter.removeListener('cancel');
+            emitter.removeAllListeners('cancel');
             emitter.on('cancel', (message) => cancelCallback(message));
         }
     }
