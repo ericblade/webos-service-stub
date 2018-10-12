@@ -4,13 +4,14 @@ try {
     ServiceInterface = require('webos-service');
     ServiceInterface.prototype.webOS = true;
     ServiceInterface.prototype.webOSSimulation = false;
-} catch(err) {
+} catch (err) {
     ServiceInterface = require('./lib/ServiceStub');
     ServiceInterface.prototype.webOS = false;
     ServiceInterface.prototype.webOSSimulation = true;
 }
 
 ServiceInterface.prototype.registerOriginal = ServiceInterface.prototype.register;
+ServiceInterface.prototype.stubMethods = {};
 
 // register: it's not 100% clear from the code what the intent of registering multiple times is --
 // the webos-service module does not register the callback to the new location, but does call the
@@ -24,7 +25,7 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
             emitter.on('request', requestCallback);
         }
         if (cancelCallback) {
-            emitter.on('cancel', (message) => cancelCallback(message))
+            emitter.on('cancel', (message) => cancelCallback(message));
         }
         if (!this.stubMethods) {
             this.stubMethods = {};
@@ -32,12 +33,20 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
         this.stubMethods[methodName] = emitter;
     } else {
         emitter = this.stubMethods[methodName];
+        if (requestCallback) {
+            emitter.removeListener('request');
+            emitter.on('request', requestCallback);
+        }
+        if (cancelCallback) {
+            emitter.removeListener('cancel');
+            emitter.on('cancel', (message) => cancelCallback(message));
+        }
     }
     if (this.registerOriginal) {
-        this.registerOriginal(methodName, requestCallback, requestCancel);
+        this.registerOriginal(methodName, requestCallback, cancelCallback);
     }
     return emitter;
-};
+}.bind(ServiceInterface);
 
 ServiceInterface.prototype.callPromise = function callPromise(uri, args) {
     return new Promise(function handlePromiseCall(resolve, reject) {
@@ -151,6 +160,6 @@ if (!ServiceInterface.prototype.webOS) {
     ServiceInterface.prototype.tempdatabase = new DatabaseStub('com.webos.service.tempdb');
 }
 
-module.exports = function(serviceName) {
+module.exports = function (serviceName) {
     return new ServiceInterface(serviceName);
 }
