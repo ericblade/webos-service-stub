@@ -1,0 +1,14 @@
+{
+  "name": "webos-service-stub",
+  "version": "1.0.0",
+  "description": "Simulator and Test module for webOS node services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eric Blade",
+  "license": "MIT",
+  "dependencies": {
+    "unique-filename": "^1.1.1"
+  }
+}
