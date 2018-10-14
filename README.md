@@ -109,7 +109,7 @@ you get successes off device. It also has no concept of schema, or any other kin
 
 The database simulation does not support the following methods:
 
-batch, compact, delKind, dump, getProfile, load, mergePut, profile, purge, purgeStatus, putKind,
+batch, compact, delKind, dump, getProfile, load, profile, purge, purgeStatus, putKind,
 putPermissions, putQuotas, quotaStats, removeAppData, search, stats, watch
 
 Supported database simulation methods:
@@ -121,17 +121,13 @@ Supported database simulation methods:
 - del: mostly complete for general use. does not support purge: false
 - put: mostly complete. as stub does not understand kinds, it will accept any information you throw
   at it, even if you do not match your on-device kind's schemas.
-- merge: supports basic operation with objects array, query support is totally unimplemented
+- merge: supports basic operation with objects array, and queries
+- mergePut: supports basic operation with queries -- live database does not seem to support mergePut with objects.
 
 ## Adding more services to the simulation
 
-If you want to add more services to the simulation, it should be pretty easy to do so --
-DatabaseStub simply requires lib/ServiceStub, and operates as if it were a regular webos service
-running inside webOS.  /index instantiates it, and provides a pointer for ServiceStub to access the
-database instances with.  ServiceStub accesses it within it's .call method.
+The simulation has now been extended to support multiple services -- any code that instantiates a new Service object with this library will be pulled into the simulation, and any functions that it registers should be callable from any other service, just as a live luna-bus service would be.
 
-If you're feeling particularly industrious, you could implement an entire luna-service2 bus
-simulation, and simulate virtually everything on a device, if you wanted to.  It's not actually
-that difficult, just not particularly necessary for the purposes that I needed to simulate.
+To add new services to this library, write a service, and require it in the index.js here, in the block at the bottom.
 
 # Enjoy!

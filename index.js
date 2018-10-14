@@ -161,8 +161,6 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
 
 if (!ServiceInterface.prototype.webOS) {
     const DatabaseStub = require('./lib/DatabaseStub');
-    ServiceInterface.prototype.database = new DatabaseStub('com.webos.service.database');
-    ServiceInterface.prototype.tempdatabase = new DatabaseStub('com.webos.service.tempdb');
 }
 
 module.exports = function (serviceName) {
