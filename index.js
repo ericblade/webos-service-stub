@@ -159,9 +159,17 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
     return emitter;
 }
 
+let db;
+let tempdb;
+let settingsService;
+let activityManager;
+
 if (!ServiceInterface.prototype.webOS) {
     const DatabaseStub = require('./lib/DatabaseStub');
-    const SettingsService = require('./lib/SettingsService');
+    db = new DatabaseStub('com.webos.service.db');
+    tempdb = new DatabaseStub('com.webos.service.tempdb');
+    settingsService = require('./lib/SettingsService');
+    activityManager = require('./lib/ActivityManager');
 }
 
 module.exports = function (serviceName) {
