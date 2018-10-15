@@ -161,6 +161,7 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
 
 if (!ServiceInterface.prototype.webOS) {
     const DatabaseStub = require('./lib/DatabaseStub');
+    const SettingsService = require('./lib/SettingsService');
 }
 
 module.exports = function (serviceName) {
