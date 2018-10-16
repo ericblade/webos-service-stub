@@ -1,3 +1,5 @@
+const uniqueFilename = require('unique-filename');
+
 let ServiceInterface;
 
 try {
@@ -17,6 +19,9 @@ ServiceInterface.prototype.stubMethods = {};
 // the webos-service module does not register the callback to the new location, but does call the
 // internal bus registration again -- this doesn't make much sense as to what it's trying to achieve
 ServiceInterface.prototype.register = function register(methodName, requestCallback, cancelCallback) {
+    if (!methodName.startsWith('/')) {
+        methodName = `/${methodName}`;
+    }
     const EventEmitter = require('events');
     let emitter;
     if (!this.stubMethods[methodName]) {
@@ -74,7 +79,7 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
             method,
             isSubscription: inParams.subscribe === true,
             category: '/', // TODO: should separate category from method, but does anyone care?
-            uniqueToken: 'qwerty', // TODO: not sure if anyone uses this...
+            uniqueToken: uniqueFilename(''),
             token: 1, // TODO: also not sure if anyone uses this
             sender: this.busId || '', // normally the service name of the sender
             ls2Message: {}, // TODO: no idea what this looks like
