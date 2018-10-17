@@ -38,9 +38,9 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
             this.stubMethods = {};
             this.stubMethods[this.busId] = {};
         }
-        this.stubMethods[this.busId][methodName] = emitter;
+        this.stubMethods[this.busId][useMethodName] = emitter;
     } else {
-        emitter = this.stubMethods[this.busId][methodName];
+        emitter = this.stubMethods[this.busId][useMethodName];
         if (requestCallback) {
             emitter.removeAllListeners('request');
             emitter.on('request', requestCallback);
@@ -51,7 +51,7 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
         }
     }
     if (this.registerOriginal) {
-        this.registerOriginal(methodName, requestCallback, cancelCallback);
+        this.registerOriginal(useMethodName, requestCallback, cancelCallback);
     }
     return emitter;
 };
