@@ -137,7 +137,7 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         activity: {}, // TODO: no idea what this looks like
         respond: function handleResponse(response) {
             if (debug) {
-                console.warn('**** handleResponse', response);
+                console.warn('**** handleResponse', this.busId, method, response);
             }
             emitter.emit('response', response);
         },
