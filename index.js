@@ -1,4 +1,6 @@
+/* eslint-disable no-console,global-require,import/no-unresolved,max-len,no-unused-vars,func-names */
 const uniqueFilename = require('unique-filename');
+const EventEmitter = require('events');
 
 let ServiceInterface;
 
@@ -13,38 +15,39 @@ try {
 }
 
 ServiceInterface.prototype.registerOriginal = ServiceInterface.prototype.register;
-ServiceInterface.prototype.stubMethods = {};
 
 // register: it's not 100% clear from the code what the intent of registering multiple times is --
 // the webos-service module does not register the callback to the new location, but does call the
 // internal bus registration again -- this doesn't make much sense as to what it's trying to achieve
 ServiceInterface.prototype.register = function register(methodName, requestCallback, cancelCallback) {
-    if (!methodName.startsWith('/')) {
-        methodName = `/${methodName}`;
-    }
-    const EventEmitter = require('events');
+    // console.warn('* register this=');
+    const useMethodName = methodName.startsWith('/') ? methodName : `/${methodName}`;
     let emitter;
-    if (!this.stubMethods[methodName]) {
+    if (!this.stubMethods[this.busId]) {
+        this.stubMethods[this.busId] = {};
+    }
+    if (!this.stubMethods[this.busId][useMethodName]) {
         emitter = new EventEmitter();
         if (requestCallback) {
             emitter.on('request', requestCallback);
         }
         if (cancelCallback) {
-            emitter.on('cancel', (message) => cancelCallback(message));
+            emitter.on('cancel', message => cancelCallback(message));
         }
         if (!this.stubMethods) {
             this.stubMethods = {};
+            this.stubMethods[this.busId] = {};
         }
-        this.stubMethods[methodName] = emitter;
+        this.stubMethods[this.busId][methodName] = emitter;
     } else {
-        emitter = this.stubMethods[methodName];
+        emitter = this.stubMethods[this.busId][methodName];
         if (requestCallback) {
             emitter.removeAllListeners('request');
             emitter.on('request', requestCallback);
         }
         if (cancelCallback) {
             emitter.removeAllListeners('cancel');
-            emitter.on('cancel', (message) => cancelCallback(message));
+            emitter.on('cancel', message => cancelCallback(message));
         }
     }
     if (this.registerOriginal) {
@@ -53,6 +56,7 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
     return emitter;
 };
 
+/* eslint-disable prefer-arrow-callback */
 ServiceInterface.prototype.callPromise = function callPromise(uri, args) {
     return new Promise(function handlePromiseCall(resolve, reject) {
         const { DEBUG_LUNA_CALLS: debug } = process.env;
@@ -68,11 +72,12 @@ ServiceInterface.prototype.callPromise = function callPromise(uri, args) {
             } else {
                 reject(res.payload);
             }
-        })
-    }.bind(this))
+        });
+    }.bind(this));
 };
 
 ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {}) {
+    // console.warn('* callMethod', method, this.busId, this);
     return new Promise(function handleCall(resolve, reject) {
         const outParams = {
             payload: inParams,
@@ -94,11 +99,11 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
                 }
             },
             cancel: function handleCancel() {
-                this.stubMethods[method].emit('cancel');
+                this.stubMethods[this.busId][method].emit('cancel');
                 reject({ returnValue: false });
             },
         };
-        if (!this.stubMethods[method]) {
+        if (!this.stubMethods[this.busId][method]) {
             reject({
                 returnValue: false,
                 errorCode: -1,
@@ -106,7 +111,7 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
             });
             return;
         }
-        this.stubMethods[method].emit('request', outParams);
+        this.stubMethods[this.busId][method].emit('request', outParams);
     }.bind(this));
 };
 
@@ -115,7 +120,6 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
     if (debug) {
         console.warn('* subscribeMethod', method);
     }
-    const EventEmitter = require('events');
     const emitter = new EventEmitter();
     if (onResponse) {
         emitter.on('response', onResponse);
@@ -143,15 +147,15 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         },
         cancel: function handleSubscriptionCancel() {
             emitter.emit('response', { subscribed: false, returnValue: true });
-            this.stubMethods[method].emit('cancel', outParams);
+            this.stubMethods[this.busId][method].emit('cancel', outParams);
         }.bind(this),
     };
     emitter.cancel = function cancelSubscription() {
-        this.stubMethods[method].emit('cancel', outParams);
+        this.stubMethods[this.busId][method].emit('cancel', outParams);
         emitter.emit('response', { subscribed: false, returnValue: true });
     }.bind(this);
     setImmediate(() => {
-        if (!this.stubMethods[method]) {
+        if (!this.stubMethods[this.busId][method]) {
             emitter.emit('cancel', {
                 returnValue: false,
                 errorCode: -1,
@@ -159,16 +163,17 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
             });
             return;
         }
-        this.stubMethods[method].emit('request', outParams);
+        this.stubMethods[this.busId][method].emit('request', outParams);
     });
     return emitter;
-}
+};
 
 let db;
 let tempdb;
 let settingsService;
 let activityManager;
 
+/* eslint-disable global-require */
 if (!ServiceInterface.prototype.webOS) {
     const DatabaseStub = require('./lib/DatabaseStub');
     db = new DatabaseStub('com.webos.service.db');
@@ -179,4 +184,4 @@ if (!ServiceInterface.prototype.webOS) {
 
 module.exports = function (serviceName) {
     return new ServiceInterface(serviceName);
-}
+};
