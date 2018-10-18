@@ -118,7 +118,7 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
 ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, inParams = {}, onResponse, onCancel) {
     const { DEBUG_LUNA_CALLS: debug } = process.env;
     if (debug) {
-        console.warn('* subscribeMethod', method);
+        console.warn('* subscribeMethod', this.busId, method);
     }
     const emitter = new EventEmitter();
     if (onResponse) {
@@ -141,30 +141,40 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         activity: {}, // TODO: no idea what this looks like
         respond: function handleResponse(response) {
             if (debug) {
-                console.warn('**** handleResponse', this.busId, method, response);
+                console.warn('**** subscription handleResponse', this.busId, method, response);
             }
+            // console.warn('**** emitting response to', emitter, response);
             emitter.emit('response', response);
-        },
+        }.bind(this),
         cancel: function handleSubscriptionCancel() {
             emitter.emit('response', { subscribed: false, returnValue: true });
             this.stubMethods[this.busId][method].emit('cancel', outParams);
         }.bind(this),
     };
     emitter.cancel = function cancelSubscription() {
-        this.stubMethods[this.busId][method].emit('cancel', outParams);
+        console.warn('* cancelSubscription');
         emitter.emit('response', { subscribed: false, returnValue: true });
+        this.stubMethods[this.busId][method].emit('cancel', outParams);
+        process.nextTick(() => {
+            emitter.removeAllListeners('response');
+            emitter.removeAllListeners('cancel');
+            delete emitter;
+        });
     }.bind(this);
-    setImmediate(() => {
-        if (!this.stubMethods[this.busId][method]) {
+    if (!this.stubMethods[this.busId][method]) {
+        setTimeout(() => {
+            console.warn('* unknown method', emitter);
             emitter.emit('cancel', {
                 returnValue: false,
                 errorCode: -1,
                 errorText: `Unknown method "${method}" for category "/"`, // TODO: separate method from category
             });
-            return;
-        }
+        }, 1);
+        return emitter;
+    }
+    setTimeout(() => {
         this.stubMethods[this.busId][method].emit('request', outParams);
-    });
+    }, 1);
     return emitter;
 };
 
