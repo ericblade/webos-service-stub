@@ -144,16 +144,14 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
                 console.warn('**** subscription handleResponse', this.busId, method, response);
             }
             // console.warn('**** emitting response to', emitter, response);
-            emitter.emit('response', response);
+            emitter.emit('response', { payload: response });
         }.bind(this),
         cancel: function handleSubscriptionCancel() {
-            emitter.emit('response', { subscribed: false, returnValue: true });
             this.stubMethods[this.busId][method].emit('cancel', outParams);
         }.bind(this),
     };
     emitter.cancel = function cancelSubscription() {
         console.warn('* cancelSubscription');
-        emitter.emit('response', { subscribed: false, returnValue: true });
         this.stubMethods[this.busId][method].emit('cancel', outParams);
         process.nextTick(() => {
             emitter.removeAllListeners('response');
