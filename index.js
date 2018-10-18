@@ -132,7 +132,7 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         method,
         isSubscription: inParams.subscribe === true,
         category: '/', // TODO: should separate category from method, but does anyone care?
-        uniqueToken: 'qwerty', // TODO: not sure if anyone uses this...
+        uniqueToken: uniqueFilename(''),
         token: 1, // TODO: also not sure if anyone uses this
         sender: this.busId || '', // normally the service name of the sender
         ls2Message: {}, // TODO: no idea what this looks like
