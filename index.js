@@ -14,6 +14,7 @@ try {
     ServiceInterface.prototype.webOSSimulation = true;
 }
 
+ServiceInterface.prototype.stubMethods = {};
 ServiceInterface.prototype.registerOriginal = ServiceInterface.prototype.register;
 
 // register: it's not 100% clear from the code what the intent of registering multiple times is --
