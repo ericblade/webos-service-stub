@@ -26,6 +26,9 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
     let emitter;
     if (!this.stubMethods[this.busId]) {
         this.stubMethods[this.busId] = {};
+        if(!this.noBuiltInMethods() && !this.registerOriginal) {
+            this.registerBuiltInMethods();
+        }
     }
     if (!this.stubMethods[this.busId][useMethodName]) {
         emitter = new EventEmitter();
@@ -55,6 +58,21 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
         this.registerOriginal(useMethodName, requestCallback, cancelCallback);
     }
     return emitter;
+};
+
+ServiceInterface.prototype.originalQuit = ServiceInterface.prototype.quit;
+ServiceInterface.prototype.quit = function doQuit(message) {
+    if (this.unregisterService) {
+        if (!this.originalQuit && message) {
+            message.respond({ status: 'quitting' });
+        }
+        this.unregisterService(message);
+    }
+    // original quit function must be called from the luna bus, but we are allowing it to be called
+    // directly for testing simulation. It would error if you called it directly in webos-service,
+    // because it depends on a message.
+    if (this.originalQuit)
+        this.originalQuit(message);
 };
 
 /* eslint-disable prefer-arrow-callback */
