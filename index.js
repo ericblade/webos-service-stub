@@ -113,18 +113,34 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
             service: {}, // TODO: no idea what this looks like
             activity: {}, // TODO: no idea what this looks like
             respond: function handleResponse(response) {
-                if (!response) {
-                    console.warn('**** service', this.busId, method, 'called respond with no parameters');
+                if (typeof response !== 'object' || response === null) {
+                    throw(new Error(`response must be an object (${this.busId}${method})`));
                 }
-                if (!response.returnValue) {
-                    reject(response);
+                const r = Object.assign(response);
+                if (r.returnValue === undefined) {
+                    if (r.errorCode || r.errorText) {
+                        r.returnValue = false;
+                        if (!r.errorCode) {
+                            console.warn(`* warning: response set errorText (${r.errorText}) without errorCode (${this.busId}${method})`);
+                            r.errorCode = -1;
+                        }
+                        if (!r.errorText) {
+                            console.warn(`* warning: response set errorCode (${r.errorCode}) without errorText (${this.busId}${method})`);
+                            r.errorText = 'no error message provided';
+                        }
+                    } else {
+                        r.returnValue = true;
+                    }
+                }
+                if (!r.returnValue) {
+                    reject(r);
                 } else {
-                    resolve(response);
+                    resolve(r);
                 }
             },
             cancel: function handleCancel() {
-                if (!response) {
-                    console.warn('**** service', this.busId, method, 'called cancel with no parameters');
+                if (typeof response !== object || response === null) {
+                    throw (new Error(`response must be an object (${this.busId}${method})`));
                 }
                 this.stubMethods[this.busId][method].emit('cancel');
                 reject({ returnValue: false });
@@ -167,26 +183,43 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         service: {}, // TODO: no idea what this looks like
         activity: {}, // TODO: no idea what this looks like
         respond: function handleResponse(response) {
-            if (!response) {
-                console.warn('**** service', this.busId, method, 'called respond with no parameters');
+            if (typeof response !== 'object' || response === null) {
+                throw (new Error(`response must be an object (${this.busId}${method})`));
             }
             if (debug) {
                 console.warn('**** subscription handleResponse', this.busId, method, response);
             }
             // console.warn('**** emitting response to', emitter, response);
-            if (response.subscribed === false) {
+            const r = Object.assign(response);
+            if (r.returnValue === undefined) {
+                if (r.errorCode || r.errorText) {
+                    r.returnValue = false;
+                    if (!r.errorCode) {
+                        console.warn(`* warning: response set errorText (${r.errorText}) without errorCode (${this.busId}${method})`);
+                        r.errorCode = -1;
+                    }
+                    if (!r.errorText) {
+                        console.warn(`* warning: response set errorCode (${r.errorCode}) without errorText (${this.busId}${method})`);
+                        r.errorText = 'no error message provided';
+                    }
+                } else {
+                    r.returnValue = true;
+                }
+            }
+            if (r.subscribed === false) {
                 this.stubMethods[this.busId][method].emit('cancel', outParams);
-                emitter.emit('cancel', { payload: response });
+                emitter.emit('cancel', { payload: r });
             } else {
-                emitter.emit('response', { payload: response });
+                emitter.emit('response', { payload: r });
             }
         }.bind(this),
         cancel: function handleSubscriptionCancel(response) {
-            if (!response) {
-                console.warn('**** service', this.busId, method, 'called cancel with no parameters');
+            if (typeof response !== 'object' || response === null) {
+                throw (new Error(`response must be an object (${this.busId}${method})`));
             }
             this.stubMethods[this.busId][method].emit('cancel', outParams);
-            emitter.emit('cancel', { payload: response });
+            const r = Object.assign(response);
+            emitter.emit('cancel', { payload: r });
         }.bind(this),
     };
     emitter.cancel = function cancelSubscription() {
@@ -199,15 +232,19 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         });
     }.bind(this);
     if (!this.stubMethods[this.busId][method]) {
+        const payload = process.env.FAIL_UNKNOWN_LUNA_SERVICES
+            ? {
+                returnValue: false,
+                errorCode: -1,
+                errorText: `Unknown method "${method}" for category "/"`, // TODO: separate method from category
+                subscribed: false,
+            }
+            : { returnValue: true, subscribed: true };
         setTimeout(() => {
             if (debug) {
                 console.warn('* unknown method', this.busId, method);
             }
-            emitter.emit('cancel', {
-                returnValue: false,
-                errorCode: -1,
-                errorText: `Unknown method "${method}" for category "/"`, // TODO: separate method from category
-            });
+            emitter.emit(payload.returnValue ? 'response' : 'cancel', { payload });
         }, 1);
         return emitter;
     }

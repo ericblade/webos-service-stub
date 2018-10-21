@@ -2,7 +2,6 @@ describe('webos-service-stub call', () => {
     let stub;
     beforeEach(() => stub = createService('test-service'));
     afterEach(() => stub && destroyService(stub));
-    // TODO: test that the internal data structures after performing a /register are correct
     it('triggers the request event', (done) => {
         const e = stub.register('/test', () => done());
         stub.call('luna://test-service/test', {});
@@ -58,5 +57,25 @@ describe('webos-service-stub call', () => {
             });
             done();
         });
+    });
+    it.only('calling between multiple stub objects is successful', (done) => {
+        const serviceA = stub;
+        const serviceB = createService('test-service-b');
+        let aReceivedCall = false;
+        let bReceivedCall = false;
+        serviceA.register('/testA', (message) => {
+            aReceivedCall = true;
+            if (bReceivedCall) {
+                done();
+            }
+        });
+        serviceB.register('/testB', (message) => {
+            bReceivedCall = true;
+            if (aReceivedCall) {
+                done();
+            }
+        });
+        serviceB.call('luna://test-service/testA', {});
+        serviceA.call('luna://test-service-b/testB', {});
     });
 });

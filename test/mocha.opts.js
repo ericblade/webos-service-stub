@@ -4,8 +4,9 @@ global.ServiceStub = ServiceStub;
 const WebosService = require('..');
 global.WebosService = WebosService;
 
-const { expect } = require('chai');
+const { expect, assert } = require('chai');
 global.expect = expect;
+global.assert = assert;
 
 global.createService = (name = 'test-service') => new ServiceStub(name);
 global.destroyService = (service) => service.unregisterService();
