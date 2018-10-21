@@ -20,6 +20,8 @@ ServiceInterface.prototype.registerOriginal = ServiceInterface.prototype.registe
 // register: it's not 100% clear from the code what the intent of registering multiple times is --
 // the webos-service module does not register the callback to the new location, but does call the
 // internal bus registration again -- this doesn't make much sense as to what it's trying to achieve
+// ... does it just make a second emitter that can handle the requests? i don't think that works,
+// either
 ServiceInterface.prototype.register = function register(methodName, requestCallback, cancelCallback) {
     // console.warn('* register this=');
     const useMethodName = methodName.startsWith('/') ? methodName : `/${methodName}`;
@@ -111,6 +113,9 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
             service: {}, // TODO: no idea what this looks like
             activity: {}, // TODO: no idea what this looks like
             respond: function handleResponse(response) {
+                if (!response) {
+                    console.warn('**** service', this.busId, method, 'called respond with no parameters');
+                }
                 if (!response.returnValue) {
                     reject(response);
                 } else {
@@ -118,6 +123,9 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
                 }
             },
             cancel: function handleCancel() {
+                if (!response) {
+                    console.warn('**** service', this.busId, method, 'called cancel with no parameters');
+                }
                 this.stubMethods[this.busId][method].emit('cancel');
                 reject({ returnValue: false });
             },
@@ -159,18 +167,30 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
         service: {}, // TODO: no idea what this looks like
         activity: {}, // TODO: no idea what this looks like
         respond: function handleResponse(response) {
+            if (!response) {
+                console.warn('**** service', this.busId, method, 'called respond with no parameters');
+            }
             if (debug) {
                 console.warn('**** subscription handleResponse', this.busId, method, response);
             }
             // console.warn('**** emitting response to', emitter, response);
-            emitter.emit('response', { payload: response });
+            if (response.subscribed === false) {
+                this.stubMethods[this.busId][method].emit('cancel', outParams);
+                emitter.emit('cancel', { payload: response });
+            } else {
+                emitter.emit('response', { payload: response });
+            }
         }.bind(this),
-        cancel: function handleSubscriptionCancel() {
+        cancel: function handleSubscriptionCancel(response) {
+            if (!response) {
+                console.warn('**** service', this.busId, method, 'called cancel with no parameters');
+            }
             this.stubMethods[this.busId][method].emit('cancel', outParams);
+            emitter.emit('cancel', { payload: response });
         }.bind(this),
     };
     emitter.cancel = function cancelSubscription() {
-        console.warn('* cancelSubscription');
+        // console.warn('* cancelSubscription');
         this.stubMethods[this.busId][method].emit('cancel', outParams);
         process.nextTick(() => {
             emitter.removeAllListeners('response');
@@ -180,7 +200,9 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
     }.bind(this);
     if (!this.stubMethods[this.busId][method]) {
         setTimeout(() => {
-            console.warn('* unknown method', emitter);
+            if (debug) {
+                console.warn('* unknown method', this.busId, method);
+            }
             emitter.emit('cancel', {
                 returnValue: false,
                 errorCode: -1,
