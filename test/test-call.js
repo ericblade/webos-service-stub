@@ -58,7 +58,7 @@ describe('webos-service-stub call', () => {
             done();
         });
     });
-    it.only('calling between multiple stub objects is successful', (done) => {
+    it('calling between multiple stub objects is successful', (done) => {
         const serviceA = stub;
         const serviceB = createService('test-service-b');
         let aReceivedCall = false;
