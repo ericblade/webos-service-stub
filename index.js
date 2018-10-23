@@ -28,7 +28,7 @@ ServiceInterface.prototype.register = function register(methodName, requestCallb
     let emitter;
     if (!this.stubMethods[this.busId]) {
         this.stubMethods[this.busId] = {};
-        if(!this.noBuiltInMethods() && !this.registerOriginal) {
+        if (!this.noBuiltInMethods && !this.registerOriginal && this.registerBuiltInMethods) {
             this.registerBuiltInMethods();
         }
     }
@@ -114,7 +114,7 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
             activity: {}, // TODO: no idea what this looks like
             respond: function handleResponse(response) {
                 if (typeof response !== 'object' || response === null) {
-                    throw(new Error(`response must be an object (${this.busId}${method})`));
+                    throw (new Error(`response must be an object (${this.busId}${method})`));
                 }
                 const r = Object.assign(response);
                 if (r.returnValue === undefined) {
@@ -217,7 +217,6 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
             if (typeof response !== 'object' || response === null) {
                 throw (new Error(`response must be an object (${this.busId}${method})`));
             }
-            this.stubMethods[this.busId][method].emit('cancel', outParams);
             const r = Object.assign(response);
             emitter.emit('cancel', { payload: r });
         }.bind(this),
