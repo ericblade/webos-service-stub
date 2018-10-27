@@ -78,4 +78,8 @@ describe('webos-service-stub call', () => {
         serviceB.call('luna://test-service/testA', {});
         serviceA.call('luna://test-service-b/testB', {});
     });
+    it('calling to a non-existent service without a callback works', (done) => {
+        stub.call('bad-service-name', {});
+        setTimeout(() => done(), 500);
+    });
 });
