@@ -41,7 +41,7 @@ the actually running service.
 service.callMethod(methodName, paramsObject)
 
 ````
-service.callPromise('/myTestMethod', { })
+service.callMethod('/myTestMethod', { })
 .then(res => expect(res).to.deep.equal({ returnValue: true }));
 ````
 
