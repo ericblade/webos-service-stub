@@ -1,3 +1,4 @@
+const fs = require('fs');
 const DataStore = require('../lib/database/DataStore');
 
 describe('Database DataStore', () => {
@@ -144,4 +145,33 @@ describe('Database DataStore', () => {
         });
     });
     // TODO: tests for merge (there are a few error conditions to test)
+    describe('dump', () => {
+        it('writes json data to given path', () => {
+            dataStore.put([
+                { _kind: 'test:1', test: true },
+            ]);
+            dataStore.dump('./test.json');
+            expect(fs.existsSync('./test.json')).to.equal(true);
+            fs.unlinkSync('./test.json');
+        });
+    });
+    describe('load', () => {
+        it('overwrites current database with contents of specified json file', () => {
+            const [{ id: id1 }] = dataStore.put([
+                { _kind: 'test:1', test: true },
+            ]);
+            const [item1] = dataStore.get([ id1 ]);
+            dataStore.dump('./test.json');
+            const [{ id: id2 }] = dataStore.put([
+                { _kind: 'test:2', testing: true },
+            ]);
+            dataStore.load('./test.json');
+            const res = dataStore.get([ id1, id2 ]);
+            const [test1, test2] = res;
+            expect(test1).to.be.an('object');
+            expect(test1).to.deep.equal(item1);
+            expect(test2).to.equal(undefined);
+            fs.unlinkSync('./test.json');
+        });
+    });
 });
