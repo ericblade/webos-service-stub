@@ -199,6 +199,21 @@ Supported database simulation methods:
 - load: simply reads the json content of the object database from the given disk file, replacing any
   other records in the database.
 
+## ActivityManager
+
+An extremely simple webOS ActivityManager stub is included. It currently only supports the /create
+method, but does not perform any actions, other than returning results that would appear correct to
+a webOS service that calls com.webos.service.activitymanager/create . More functionality of the
+service could certainly be implemented, but has not yet proven to be necessary.
+
+## SettingsService
+
+An extremely simple implementation of the webOS on TV's settings service, com.webos.settingsservice,
+is implemented.  It currently returns a static set of results that mirror what the responses are on
+my consumer LG webOS TV.  This is intended to allow for testing of services that run on LG TV's, and
+depend on the results of com.webos.settingsservice/getSystemSettings existing beyond a simple
+{ returnValue: true } return.  This is not intended for any other use.
+
 ## Adding more services to the simulation
 
 The simulation has now been extended to support multiple services -- any code that instantiates a new Service object with this library will be pulled into the simulation, and any functions that it registers should be callable from any other service, just as a live luna-bus service would be.
