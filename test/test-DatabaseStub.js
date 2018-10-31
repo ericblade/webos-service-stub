@@ -1,6 +1,6 @@
 const DatabaseStub = require('../lib/DatabaseStub');
 
-describe.only('DatabaseStub', () => {
+describe('DatabaseStub', () => {
     let stub;
     beforeEach(() => stub = new DatabaseStub('db'));
     describe('unimplemented functions return unimplemented error', () => {
