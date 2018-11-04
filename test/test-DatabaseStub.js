@@ -116,14 +116,6 @@ describe('DatabaseStub', () => {
                     message: '/stats not implemented',
                 }));
         });
-        it('/watch', () => {
-            return callService('luna://db/watch', {})
-                .then(x => assert.fail())
-                .catch(x => expect(x).to.deep.equal({
-                    returnValue: false,
-                    message: '/watch not implemented',
-                }));
-        });
     });
     describe('reserveIds', () => {
         it('reserveIds', () => {
@@ -153,4 +145,5 @@ describe('DatabaseStub', () => {
     describe('mergePut // TODO', () => {});
     describe('dump // TODO', () => {});
     describe('load // TODO', () => {});
+    describe('watch // TODO', () => {});
 });
