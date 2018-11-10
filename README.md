@@ -180,7 +180,7 @@ you get successes off device. It also has no concept of schema, or any other kin
 The database simulation does not support the following methods:
 
 batch, compact, delKind, getProfile, profile, purge, purgeStatus, putKind,
-putPermissions, putQuotas, quotaStats, removeAppData, search, stats, watch
+putPermissions, putQuotas, quotaStats, removeAppData, search, stats
 
 Supported database simulation methods:
 
@@ -198,6 +198,9 @@ Supported database simulation methods:
   to load the results of this to a live db8.
 - load: simply reads the json content of the object database from the given disk file, replacing any
   other records in the database.
+- watch: this includes watches in find. these should work as a live db8 does, which varies in
+  several places from the db8 documentation.  Please see the DatabaseStub code for details, if
+  you're not particularly familiar with db8 already. :-)
 
 ## ActivityManager
 

@@ -245,7 +245,6 @@ describe('Database DataStore', () => {
         });
         it('less than', () => {
             const res = dataStore.query('test:1', [{ prop: 'a', op: '<', val: 3 }]);
-            console.warn('* test=',res);
             expect(res).to.be.an('array').with.lengthOf(2);
         });
         it('less than equal', () => {

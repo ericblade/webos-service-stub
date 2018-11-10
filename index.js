@@ -103,7 +103,7 @@ ServiceInterface.prototype.callMethod = function callMethod(method, inParams = {
         const outParams = {
             payload: inParams,
             method,
-            isSubscription: inParams.subscribe === true,
+            isSubscription: inParams.subscribe === true || inParams.watch === true,
             category: '/', // TODO: should separate category from method, but does anyone care?
             uniqueToken: uniqueFilename(''),
             token: 1, // TODO: also not sure if anyone uses this
@@ -173,7 +173,7 @@ ServiceInterface.prototype.subscribeMethod = function subscribeMethod(method, in
     const outParams = {
         payload: inParams,
         method,
-        isSubscription: inParams.subscribe === true,
+        isSubscription: inParams.subscribe === true || inParams.watch === true,
         category: '/', // TODO: should separate category from method, but does anyone care?
         uniqueToken: uniqueFilename(''),
         token: 1, // TODO: also not sure if anyone uses this
