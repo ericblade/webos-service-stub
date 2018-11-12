@@ -186,7 +186,7 @@ Supported database simulation methods:
 
 - reserveIds: appears to be complete, according to the documentation
 - get: appears to be complete, according to the documentation
-- find: mostly complete for general use. does not support limit, orderBy, incDel, select. find
+- find: mostly complete for general use. does not support orderBy, incDel, select. find
   queries with "where" do not support "%%" operation (partial text match)
 - del: mostly complete for general use. does not support purge: false
 - put: mostly complete. as stub does not understand kinds, it will accept any information you throw

@@ -139,6 +139,104 @@ describe('DatabaseStub', () => {
     });
     describe('get // TODO', () => {});
     describe('find', () => {
+        it('find with limit returns only the specified limit number of items', () => {
+            const promises = [];
+            for(let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [ { _kind: 'db-test-kind:1', test: x }]}));
+            }
+            return Promise.all(promises)
+            .then(() => (
+                callService('luna://db/find', { query: { from: 'db-test-kind:1', limit: 5 } })
+            ))
+            .then((x) => {
+                expect(x).to.be.an('object').that.has.keys([ 'results', 'next', 'returnValue' ]);
+                expect(x.results).to.be.an('array').that.has.lengthOf(5);
+                expect(x.next).to.be.a('string').that.is.not.empty;
+                expect(x.returnValue).to.equal(true);
+                const [ test0, test1, test2, test3, test4 ] = x.results;
+                expect(test0.test).to.equal(0);
+                expect(test1.test).to.equal(1);
+                expect(test2.test).to.equal(2);
+                expect(test3.test).to.equal(3);
+                expect(test4.test).to.equal(4);
+            });
+        });
+        it('find with limit 0 returns empty results', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+                .then(() => (
+                    callService('luna://db/find', { query: { from: 'db-test-kind:1', limit: 0 } })
+                ))
+                .then((x) => {
+                    expect(x).to.be.an('object').that.has.keys(['results', 'returnValue']);
+                    expect(x.results).to.be.an('array').that.has.lengthOf(0);
+                    expect(x.returnValue).to.equal(true);
+                });
+        });
+        it('find with limit 0 and count returns empty results with proper count', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+                .then(() => (
+                    callService('luna://db/find', { query: { from: 'db-test-kind:1', limit: 0 }, count: true })
+                ))
+                .then((x) => {
+                    expect(x).to.be.an('object').that.has.keys(['results', 'count', 'returnValue']);
+                    expect(x.results).to.be.an('array').that.has.lengthOf(0);
+                    expect(x.count).to.equal(20);
+                    expect(x.returnValue).to.equal(true);
+                });
+        });
+        // TODO: find out what happens both here and on a live device, if you attempt to merge or
+        // mergePut with a query with limit!
+        // TODO: add a test for the 500 limit cap
+        it('find with limit 5 and count returns empty results with proper count', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+                .then(() => (
+                    callService('luna://db/find', { query: { from: 'db-test-kind:1', limit: 5 }, count: true })
+                ))
+                .then((x) => {
+                    expect(x).to.be.an('object').that.has.keys(['results', 'count', 'next', 'returnValue']);
+                    expect(x.results).to.be.an('array').that.has.lengthOf(5);
+                    expect(x.next).to.be.a('string').that.is.not.empty;
+                    expect(x.count).to.equal(20);
+                    expect(x.returnValue).to.equal(true);
+                });
+        });
+        it('find with page returns a given page', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+            .then(() => (
+                callService('luna://db/find', { query: { from: 'db-test-kind:1', limit: 5 } })
+            ))
+            .then(({ next }) => (
+                callService('luna://db/find', { query: { page: next } })
+            ))
+            .then((x) => {
+                expect(x).to.be.an('object').that.has.keys(['results', 'next', 'returnValue']);
+                expect(x.results).to.be.an('array').that.has.lengthOf(5);
+                expect(x.next).to.be.a('string').that.is.not.empty;
+                expect(x.returnValue).to.equal(true);
+                const [test0, test1, test2, test3, test4] = x.results;
+                expect(test0.test).to.equal(5);
+                expect(test1.test).to.equal(6);
+                expect(test2.test).to.equal(7);
+                expect(test3.test).to.equal(8);
+                expect(test4.test).to.equal(9);
+            });
+        });
         it('find with watch returns original result, and later a fired when a new object is put', (done) => {
             callService(
                 'luna://db/put',
