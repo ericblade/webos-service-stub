@@ -139,6 +139,40 @@ describe('DatabaseStub', () => {
     });
     describe('get // TODO', () => {});
     describe('find', () => {
+        const random = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
+        it('find with orderBy', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: random(1, 50) }] }));
+            }
+            return Promise.all(promises)
+            .then(() => (
+                callService('luna://db/find', { query: { from: 'db-test-kind:1', orderBy: 'test' } })
+            ))
+            .then(({ results }) => {
+                expect(results[0].test).to.be.at.most(results[1].test);
+                expect(results[1].test).to.be.at.most(results[2].test);
+                expect(results[0].test).to.be.at.most(results[19].test);
+                expect(results[1].test).to.be.at.most(results[19].test);
+            });
+        });
+        it('find with orderBy descending', () => {
+            const promises = [];
+            for (let x = 0; x < 20; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: random(1, 50) }] }));
+            }
+            return Promise.all(promises)
+            .then(() => (
+                callService('luna://db/find', { query: { from: 'db-test-kind:1', orderBy: 'test', desc: true } })
+            ))
+            .then(({ results }) => {
+                expect(results[0].test).to.be.at.least(results[1].test);
+                expect(results[1].test).to.be.at.least(results[2].test);
+                expect(results[0].test).to.be.at.least(results[19].test);
+                expect(results[1].test).to.be.at.least(results[19].test);
+            });
+        });
+        // TODO: should probably write orderBy tests with non-numerical sorting
         it('find with limit returns only the specified limit number of items', () => {
             const promises = [];
             for(let x = 0; x < 20; x++) {
