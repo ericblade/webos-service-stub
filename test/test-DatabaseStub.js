@@ -140,6 +140,31 @@ describe('DatabaseStub', () => {
     describe('get // TODO', () => {});
     describe('find', () => {
         const random = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
+        it('find with select returns only the specified fields', () => {
+            const promises = [];
+            for (let x = 0; x < 10; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+            .then(() => (
+                callService('luna://db/find', { query: { from: 'db-test-kind:1', select: ['test'] } })
+            ))
+            .then(({ results }) => {
+                expect(results).to.deep.equal([
+                    { test: 0 },
+                    { test: 1 },
+                    { test: 2 },
+                    { test: 3 },
+                    { test: 4 },
+                    { test: 5 },
+                    { test: 6 },
+                    { test: 7 },
+                    { test: 8 },
+                    { test: 9 },
+                ]);
+            });
+        });
+        // TODO: test select with multiple fields
         it('find with orderBy', () => {
             const promises = [];
             for (let x = 0; x < 20; x++) {
