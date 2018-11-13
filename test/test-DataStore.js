@@ -232,74 +232,77 @@ describe('Database DataStore', () => {
             ]);
         });
         it('from unknown kind returns empty array', () => {
-            const res = dataStore.query('test:5');
+            const res = dataStore.query({ from: 'test:5' });
             expect(res).to.be.an('array').with.lengthOf(0);
         });
         it('from kind returns all units of that kind', () => {
-            const res = dataStore.query('test:1');
+            const res = dataStore.query({ from: 'test:1' });
             expect(res).to.be.an('array').with.lengthOf(3);
         });
         it('does not return results outside of the given kind', () => {
-            const res = dataStore.query('test:2');
+            const res = dataStore.query({ from: 'test:2' });
             expect(res.every(r => r._kind === 'test:2'));
         });
         it('less than', () => {
-            const res = dataStore.query('test:1', [{ prop: 'a', op: '<', val: 3 }]);
+            const res = dataStore.query({ from: 'test:1', where: [{ prop: 'a', op: '<', val: 3 }]});
             expect(res).to.be.an('array').with.lengthOf(2);
         });
         it('less than equal', () => {
-            const res = dataStore.query('test:1', [{ prop: 'a', op: '<=', val: 2 }]);
+            const res = dataStore.query({ from: 'test:1', where: [{ prop: 'a', op: '<=', val: 2 }]});
             expect(res).to.be.an('array').with.lengthOf(2);
         });
         it('equal', () => {
-            const res = dataStore.query('test:2', [{ prop: 'a', op: '=', val: 'test' }]);
+            const res = dataStore.query({ from: 'test:2', where: [{ prop: 'a', op: '=', val: 'test' }]});
             expect(res).to.be.an('array').with.lengthOf(1);
         });
         it('greater than equal', () => {
-            const res = dataStore.query('test:1', [{ prop: 'a', op: '>=', val: 2 }]);
+            const res = dataStore.query({ from: 'test:1', where: [{ prop: 'a', op: '>=', val: 2 }]});
             expect(res).to.be.an('array').with.lengthOf(2);
         });
         it('greater than', () => {
-            const res = dataStore.query('test:1', [{ prop: 'a', op: '>', val: 2 }]);
+            const res = dataStore.query({ from: 'test:1', where: [{ prop: 'a', op: '>', val: 2 }]});
             expect(res).to.be.an('array').with.lengthOf(1);
         });
         it('not equal', () => {
-            const res = dataStore.query('test:2', [{ prop: 'a', op: '!=', val: 'test' }]);
+            const res = dataStore.query({ from: 'test:2', where: [{ prop: 'a', op: '!=', val: 'test' }]});
             expect(res).to.be.an('array').with.lengthOf(1);
         });
         it('string starts with', () => {
-            const res = dataStore.query('test:2', [{ prop: 'a', op: '%', val: 'really' }]);
+            const res = dataStore.query({ from: 'test:2', where: [{ prop: 'a', op: '%', val: 'really' }]});
             expect(res).to.be.an('array').with.lengthOf(1);
         });
         describe('multi-where', () => {
             it('a > 1 && test === true should be empty', () => {
-                const res = dataStore.query(
-                    'test:3',
+                const res = dataStore.query({
+                    from: 'test:3',
+                    where:
                     [
                         { prop: 'a', op: '>', val: 2 },
                         { prop: 'test', op: '=', val: true },
                     ]
-                );
+                });
                 expect(res).to.be.an('array').with.lengthOf(0);
             });
             it('a < 2 && test === true should return 1', () => {
-                const res = dataStore.query(
-                    'test:3',
+                const res = dataStore.query({
+                    from: 'test:3',
+                    where:
                     [
                         { prop: 'a', 'op': '<', val: 2 },
                         { prop: 'test', op: '=', val: true },
                     ]
-                );
+                });
                 expect(res).to.be.an('array').with.lengthOf(1);
             });
             it('a > 1 && b > 1 should return 2', () => {
-                const res = dataStore.query(
-                    'test:3',
+                const res = dataStore.query({
+                    from: 'test:3',
+                    where:
                     [
                         { prop: 'a', 'op': '>', val: 1 },
                         { prop: 'b', 'op': '>', val: 1 },
                     ]
-                );
+                });
                 expect(res).to.be.an('array').with.lengthOf(2);
             });
         });
