@@ -72,15 +72,65 @@ describe('Database DataStore', () => {
             });
         });
         describe('del', () => {
-            it('del on an empty database returns', () => {
-                const test = dataStore.del([ 'invalidId' ]);
+            it('on an empty database returns', () => {
+                const test = dataStore.del(['invalidId']);
                 expect(test).to.be.an('array').with.lengthOf(0);
             });
-            it('del returns correct results for a single deletion', () => {
+            it('returns correct results for a single deletion', () => {
+                const [{ id }] = dataStore.put([
+                    { _kind: 'test-kind:1', name: 'test 1' },
+                ]);
+                const res = dataStore.del([id]);
+                expect(res).to.be.an('array').with.lengthOf(1);
+                const [test] = res;
+                expect(test).to.be.an('object').that.has.keys([
+                    'id', 'rev'
+                ]);
+                expect(test.id).to.be.a('string').that.is.not.empty;
+                expect(test.rev).to.be.a('number');
+            });
+            it('returns correct results for multiple deletions', () => {
+                const [{ id: id1 }, { id: id2 }] = dataStore.put([
+                    { _kind: 'test-kind:1', name: 'test 1' },
+                    { _kind: 'test-kind:1', name: 'test 2' },
+                ]);
+                const res = dataStore.del([id1, id2]);
+                expect(res).to.be.an('array').with.lengthOf(2);
+                const [test1, test2] = res;
+                expect(test1).to.be.an('object').that.has.keys([
+                    'id', 'rev',
+                ]);
+                expect(test2).to.be.an('object').that.has.keys([
+                    'id', 'rev',
+                ]);
+            });
+            it('query of non-purged items with incDel works', () => {
+                const [{ id }] = dataStore.put([
+                    { _kind: 'test-kind:1', name: 'test 1' },
+                ]);
+                const res = dataStore.del([id]);
+                const test = dataStore.get([id], true);
+                expect(test).to.be.an('array').with.lengthOf(1);
+            });
+            it('query of non-purged items without incDel returns nothing', () => {
+                const [{ id }] = dataStore.put([
+                    { _kind: 'test-kind:1', name: 'test 1' },
+                ]);
+                const res = dataStore.del([id]);
+                const test = dataStore.get([id], false);
+                expect(test).to.be.an('array').with.lengthOf(0);
+            });
+        });
+        describe('delPurge', () => {
+            it('on an empty database returns', () => {
+                const test = dataStore.delPurge([ 'invalidId' ]);
+                expect(test).to.be.an('array').with.lengthOf(0);
+            });
+            it('returns correct results for a single deletion', () => {
                 const [ { id } ] = dataStore.put([
                     { _kind: 'test-kind:1', name: 'test 1' },
                 ]);
-                const res = dataStore.del([ id ]);
+                const res = dataStore.delPurge([ id ]);
                 expect(res).to.be.an('array').with.lengthOf(1);
                 const [ test ] = res;
                 expect(test).to.be.an('object').that.has.keys([
@@ -89,12 +139,12 @@ describe('Database DataStore', () => {
                 expect(test.id).to.be.a('string').that.is.not.empty;
                 expect(test.rev).to.be.a('number');
             });
-            it('del returns correct results for multiple deletions', () => {
+            it('returns correct results for multiple deletions', () => {
                 const [ { id: id1 }, { id: id2 } ] = dataStore.put([
                     { _kind: 'test-kind:1', name: 'test 1' },
                     { _kind: 'test-kind:1', name: 'test 2' },
                 ]);
-                const res = dataStore.del([ id1, id2 ]);
+                const res = dataStore.delPurge([ id1, id2 ]);
                 expect(res).to.be.an('array').with.lengthOf(2);
                 const [ test1, test2 ] = res;
                 expect(test1).to.be.an('object').that.has.keys([
@@ -216,6 +266,8 @@ describe('Database DataStore', () => {
         });
     });
     // separate from the other tests so we can have a single before instead of beforeEach setup
+    // TODO: add tests for query limit, orderBy, desc, select, incDel (although there are already
+    // tests for the DatabaseStub calling them...)
     describe('query', () => {
         let dataStore;
         before(() => {

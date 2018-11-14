@@ -140,6 +140,32 @@ describe('DatabaseStub', () => {
     describe('get // TODO', () => {});
     describe('find', () => {
         const random = (min, max) => Math.floor(Math.random() * (max - min) ) + min;
+        it('find with incDel=false does not return deleted objects', () => {
+            const promises = [];
+            for (let x = 0; x < 10; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+            .then((pResults) => {
+                const [id0, id1, id2, ...ids] = pResults.map((pr) => (pr.results[0].id));
+                callService('luna://db/del', { ids, purge: false });
+            })
+            .then(() => callService('luna://db/find', { query: { from: 'db-test-kind:1', select: ['test'] } }))
+            .then(({ results }) => expect(results).to.be.an('array').with.lengthOf(3));
+        });
+        it('find with incDel=true does return deleted objects', () => {
+            const promises = [];
+            for (let x = 0; x < 10; x++) {
+                promises.push(callService('luna://db/put', { objects: [{ _kind: 'db-test-kind:1', test: x }] }));
+            }
+            return Promise.all(promises)
+                .then((pResults) => {
+                    const [id0, id1, id2, ...ids] = pResults.map((pr) => (pr.results[0].id));
+                    callService('luna://db/del', { ids, purge: false });
+                })
+                .then(() => callService('luna://db/find', { query: { from: 'db-test-kind:1', select: ['test'], incDel: true } }))
+                .then(({ results }) => expect(results).to.be.an('array').with.lengthOf(10));
+        });
         it('find with select returns only the specified fields', () => {
             const promises = [];
             for (let x = 0; x < 10; x++) {
