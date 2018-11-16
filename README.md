@@ -179,7 +179,7 @@ you get successes off device. It also has no concept of schema, or any other kin
 
 The database simulation does not support the following methods:
 
-compact, delKind, getProfile, profile, purgeStatus, putKind,
+compact, delKind, getProfile, profile, putKind,
 putPermissions, putQuotas, quotaStats, removeAppData, search, stats
 
 Supported database simulation methods:
@@ -187,6 +187,7 @@ Supported database simulation methods:
 - batch: appears to be complete, according to the documentation
 - compact: appears to be complete, according to the documentation
 - purge: functionally equivalent to compact, but also returns a count of items purged/compacted
+- purgeStatus: appears to be complete, according to the documentation
 - reserveIds: appears to be complete, according to the documentation
 - get: appears to be complete, according to the documentation
 - find: mostly complete for general use. supports from, where, limit, orderBy, desc, select, incDel. find
