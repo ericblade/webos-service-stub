@@ -4,14 +4,6 @@ describe('DatabaseStub', () => {
     let stub;
     beforeEach(() => stub = new DatabaseStub('db'));
     describe('unimplemented functions return unimplemented error', () => {
-        it('/batch', () => {
-            return callService('luna://db/batch', {})
-                .then(x => assert.fail())
-                .catch(x => expect(x).to.deep.equal({
-                    returnValue: false,
-                    message: '/batch not implemented',
-                }));
-        });
         it('/compact', () => {
             return callService('luna://db/compact', {})
                 .then(x => assert.fail())
@@ -365,6 +357,7 @@ describe('DatabaseStub', () => {
             });
         });
     });
+    describe('/batch // TODO', () => {});
     describe('del // TODO', () => {});
     describe('put // TODO', () => {});
     describe('merge // TODO', () => {});
