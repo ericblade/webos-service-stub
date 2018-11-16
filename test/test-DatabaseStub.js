@@ -4,14 +4,6 @@ describe('DatabaseStub', () => {
     let stub;
     beforeEach(() => stub = new DatabaseStub('db'));
     describe('unimplemented functions return unimplemented error', () => {
-        it('/compact', () => {
-            return callService('luna://db/compact', {})
-                .then(x => assert.fail())
-                .catch(x => expect(x).to.deep.equal({
-                    returnValue: false,
-                    message: '/compact not implemented',
-                }));
-        });
         it('/delKind', () => {
             return callService('luna://db/delKind', {})
                 .then(x => assert.fail())
@@ -34,14 +26,6 @@ describe('DatabaseStub', () => {
                 .catch(x => expect(x).to.deep.equal({
                     returnValue: false,
                     message: '/profile not implemented',
-                }));
-        });
-        it('/purge', () => {
-            return callService('luna://db/purge', {})
-                .then(x => assert.fail())
-                .catch(x => expect(x).to.deep.equal({
-                    returnValue: false,
-                    message: '/purge not implemented',
                 }));
         });
         it('/purgeStatus', () => {
@@ -357,7 +341,9 @@ describe('DatabaseStub', () => {
             });
         });
     });
-    describe('/batch // TODO', () => {});
+    describe('batch // TODO', () => {});
+    describe('compact // TODO', () => {});
+    describe('purge // TODO', () => {});
     describe('del // TODO', () => {});
     describe('put // TODO', () => {});
     describe('merge // TODO', () => {});
