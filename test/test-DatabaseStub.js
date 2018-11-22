@@ -28,14 +28,6 @@ describe('DatabaseStub', () => {
                     message: '/profile not implemented',
                 }));
         });
-        it('/purgeStatus', () => {
-            return callService('luna://db/purgeStatus', {})
-                .then(x => assert.fail())
-                .catch(x => expect(x).to.deep.equal({
-                    returnValue: false,
-                    message: '/purgeStatus not implemented',
-                }));
-        });
         it('/putKind', () => {
             return callService('luna://db/putKind', {})
                 .then(x => assert.fail())
@@ -344,6 +336,7 @@ describe('DatabaseStub', () => {
     describe('batch // TODO', () => {});
     describe('compact // TODO', () => {});
     describe('purge // TODO', () => {});
+    describe('purgeStatus // TODO', () => {});
     describe('del // TODO', () => {});
     describe('put // TODO', () => {});
     describe('merge // TODO', () => {});

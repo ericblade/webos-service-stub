@@ -1,7 +1,7 @@
-const ServiceStub = require('../lib/ServiceStub');
+const ServiceStub = require('../lib/lunasim/ServiceStub');
 global.ServiceStub = ServiceStub;
 
-const WebosService = require('..');
+const WebosService = require('../lib/lunasim/LunaService');
 global.WebosService = WebosService;
 
 const { expect, assert } = require('chai');
