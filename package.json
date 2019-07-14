@@ -1,6 +1,6 @@
 {
   "name": "webos-service-stub",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Simulator and Test module for webOS node services",
   "main": "lib/ServiceStub.js",
   "scripts": {
