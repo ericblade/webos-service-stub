@@ -1,5 +1,7 @@
 # webos-service-stub
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ericblade/webos-service-stub.svg)](https://greenkeeper.io/)
+
 This is a module to be used for building and testing webOS node.js service components both on and
 off device.
 
