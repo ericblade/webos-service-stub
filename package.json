@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "fast-deep-equal": "^2.0.1",
-    "unique-filename": "^1.1.1"
+    "unique-filename": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
